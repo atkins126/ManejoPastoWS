@@ -57,7 +57,7 @@ var
  dbPassw,
  dbName,
  dbServer,
- dbPort: String;
+ dbPort,vRDS: String;
  StrAux     : TStringWriter;
  txtJson    : TJsonTextWriter;
 begin
@@ -68,7 +68,7 @@ begin
  begin
    txtJson.WriteStartObject;
    txtJson.WritePropertyName('Erro');
-   txtJson.WriteValue('Arquivo Fort.ini não localizado no seguinte diretorio:'+
+   txtJson.WriteValue('Arquivo pecuarizze.ini não localizado no seguinte diretorio:'+
    Arquivo);
    txtJson.WriteEndObject;
    Result := TJsonObject.ParseJSONValue(TEncoding.UTF8.GetBytes(StrAux.ToString),0)as TJSONObject;
@@ -76,22 +76,34 @@ begin
  else
  begin
    vVendorLib := ExtractFilePath(ParamStr(0))+'DrivesDB\libpq_32.dll';
-   dbUser     := LerIni(Arquivo,'LOCAL','UserName','');
-   dbPassw    := LerIni(Arquivo,'LOCAL','Password','');
    dbName     := LerIni(Arquivo,'LOCAL','Database','');
    dbServer   := LerIni(Arquivo,'LOCAL','Server','');
-   dbPort     := LerIni(Arquivo,'LOCAL','Port','');
+   vRDS       := LerIni(Arquivo,'LOCAL','RDS','');
    with FDConPG do
    begin
     Params.Clear;
-    Params.Values['DriverID']        := 'PG';
-    Params.Values['User_name']       := dbUser;
-    Params.Values['Database']        := dbName;
-    Params.Values['Password']        := dbPassw;
-    Params.Values['DriverName']      := 'PG';
-    Params.Values['Server']          := dbServer;
-    Params.Values['Port']            := dbPort;
-    PgDriverLink.VendorLib           := vVendorLib;
+    if vRDS='N' then
+    begin
+     Params.Values['DriverID']        := 'PG';
+     Params.Values['User_name']       := 'postgres';
+     Params.Values['Database']        := dbName;
+     Params.Values['Password']        := 'Dev#110485';
+     Params.Values['DriverName']      := 'PG';
+     Params.Values['Server']          := dbServer;
+     Params.Values['Port']            := '5432';
+     PgDriverLink.VendorLib           := vVendorLib;
+    end
+    else
+    begin
+     Params.Values['DriverID']        := 'PG';
+     Params.Values['User_name']       := 'postgres';
+     Params.Values['Database']        := dbName;
+     Params.Values['Password']        := 'Dev#110485';
+     Params.Values['DriverName']      := 'PG';
+     Params.Values['Server']          := 'solotecsolucoes.chhbmii57c8o.us-east-2.rds.amazonaws.com';
+     Params.Values['Port']            := '5432';
+     PgDriverLink.VendorLib           := vVendorLib;
+    end;
    try
      Connected := true;
      txtJson.WriteStartObject;
