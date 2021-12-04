@@ -173,7 +173,7 @@ type
     function GetAuxCapim: TJSONObject;
     function GetHistEscore: TJSONObject;
     function GetAnimalPasto: TJSONObject;
-    function  RetornaMaxId(vTable:string):string;
+    function RetornaMaxId(vTable:string):string;
     function PostScore(obj: TJSONObject): TJSONObject;
     function PostDetAnimalPasto(obj: TJSONObject): TJSONObject;
   end;
@@ -221,10 +221,15 @@ begin
      TScore.Edit;
     for x := 0 to TScore.Fields.Count -1 do
     begin
-     vField  := StringReplace(TScore.Fields[x].Name,
-      'TScore','',[rfReplaceAll]);
+     vField  := StringReplace(TScore.Fields[x].Name,'TScore','',[rfReplaceAll]);
      if (vField<>'datareg') and (vField<>'id') then
-      TScore.FieldByName(vField).AsString     := vQry.FieldByName(vField).AsString;
+      if vField='qtdcabeca' then
+      begin
+        if vQry.FieldByName(vField).AsString.Length=0 then
+         TScore.FieldByName(vField).AsInteger:= 0;
+      end
+      else
+       TScore.FieldByName(vField).AsString     := vQry.FieldByName(vField).AsString;
     end;
     try
      TScore.Post;
@@ -244,6 +249,7 @@ begin
         txtJson.WriteValue('Erro Ao Sincronizar Movimentação de Combustivel:'+E.Message);
         txtJson.WriteEndObject;
         Result := TJsonObject.ParseJSONValue(TEncoding.UTF8.GetBytes(StrAux.ToString),0)as TJSONObject;
+        Exit;
       end;
     end;
   end;
